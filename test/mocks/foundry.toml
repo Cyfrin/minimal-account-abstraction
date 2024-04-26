@@ -1,0 +1,15 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+auto_detect_remappings = false
+chain_id = 1
+auto_detect_solc = false
+solc_version = "0.8.17"
+evm_version = "london"
+via_ir = true
+optimizer = true
+optimizer_runs = 1000000
+libraries = []
+
+# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

@@ -1,66 +1,29 @@
-## Foundry
+# Account Abstraction
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+- [Account Abstraction](#account-abstraction)
+  - [What is Account Abstraction?](#what-is-account-abstraction)
+  - [What's this repo show?](#whats-this-repo-show)
+- [Acknowledgements](#acknowledgements)
 
-Foundry consists of:
+## What is Account Abstraction?
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+EoAs are now smart contracts. That's all account abstraction is.
 
-## Documentation
+But what does that mean?
 
-https://book.getfoundry.sh/
+Right now, every single transaction in web3 stems from a single private key. 
 
-## Usage
+> account abstraction means that not only the execution of a transaction can be arbitrarily complex computation logic as specified by the EVM, but also the authorization logic.
 
-### Build
+- [Vitalik Buterin](https://ethereum-magicians.org/t/implementing-account-abstraction-as-part-of-eth1-x/4020)
+- [EntryPoint Contract](https://etherscan.io/address/0x5ff137d4b0fdcd49dca30c7cf57e578a026d2789/advanced)
 
-```shell
-$ forge build
-```
+## What's this repo show?
 
-### Test
+1. A minimal EVM "Smart Wallet" using alt-mempool AA
+2. A minimal zkSync "Smart Wallet" using native AA
 
-```shell
-$ forge test
-```
+# Acknowledgements 
 
-### Format
-
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+- [eth-infinitism](https://github.com/eth-infinitism/account-abstraction)
+- [Dan Nolan](https://www.youtube.com/watch?v=b4KWkIAPa3U)

@@ -2,5 +2,54 @@
 src = "src"
 out = "out"
 libs = ["lib"]
+solc = "0.8.24"
+remappings = ['@openzeppelin/contracts=lib/openzeppelin-contracts/contracts']
+# fs_permissions = [
+#     { access = "read", path = "./broadcast" },
+#     { access = "read", path = "./reports" },
+# ]
+
+
+[fuzz]
+runs = 1000
+max_test_rejects = 65536
+seed = '0x1'
+dictionary_weight = 40
+include_storage = true
+include_push_bytes = true
+extra_output = ["storageLayout", "metadata"]
+
+[invariant]
+runs = 256
+depth = 32
+fail_on_revert = true
+
+[fmt]
+bracket_spacing = true
+int_types = "long"
+line_length = 120
+multiline_func_header = "all"
+number_underscore = "thousands"
+quote_style = "double"
+tab_width = 4
+wrap_comments = true
+
+[etherscan]
+# zksync = no keey needed for zksync
+arbitrum = { key = "${API_KEY_ARBISCAN}" }
+avalanche = { key = "${API_KEY_SNOWTRACE}" }
+bnb_smart_chain = { key = "${API_KEY_BSCSCAN}" }
+gnosis_chain = { key = "${API_KEY_GNOSISSCAN}" }
+goerli = { key = "${API_KEY_ETHERSCAN}" }
+mainnet = { key = "${API_KEY_ETHERSCAN}" }
+optimism = { key = "${API_KEY_OPTIMISTIC_ETHERSCAN}" }
+polygon = { key = "${API_KEY_POLYGONSCAN}" }
+sepolia = { key = "${API_KEY_ETHERSCAN}" }
+
+
+[rpc_endpoints]
+# example:
+# zksync = "https://mainnet.era.zksync.io"
+
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
