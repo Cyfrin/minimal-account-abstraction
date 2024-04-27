@@ -103,8 +103,10 @@ contract MinimalAccountTest is Test {
         pure
         returns (PackedUserOperation memory)
     {
-        uint128 verificationGasLimit = 1 << 24; // 16_777_216, this number is commonly chosen cuz it's "pretty good" as
-            // a gas limit
+        // 16_777_216, this number is commonly chosen cuz it's "pretty good" as
+        // This is some clever shifting bit stuff to make numbers
+        uint128 verificationGasLimit = 1 << 24;
+        // a gas limit
         uint128 callGasLimit = 1 << 24;
         uint128 maxPriorityFeePerGas = 1 << 8;
         uint128 maxFeePerGas = 1 << 8;
@@ -116,6 +118,7 @@ contract MinimalAccountTest is Test {
             // This is how we concat the two variables into one bytes32. This is what's needed for our struct.
             accountGasLimits: bytes32(uint256(verificationGasLimit) << 128 | callGasLimit),
             preVerificationGas: 1 << 24,
+            // This is how we concat the two variables into one bytes32. This is what's needed for our struct.
             gasFees: bytes32(uint256(maxPriorityFeePerGas) << 128 | maxFeePerGas),
             paymasterAndData: "",
             signature: ""

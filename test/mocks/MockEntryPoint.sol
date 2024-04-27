@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity <0.9.0 >=0.7.5 ^0.8.0 ^0.8.12;
+pragma solidity ^0.8.4;
+
+import { console2 } from "forge-std/console2.sol";
 
 // lib/@openzeppelin/contracts/security/ReentrancyGuard.sol
 
@@ -1222,8 +1224,7 @@ contract MockEntryPoint is IEntryPoint, StakeManager, NonceManager, ReentrancyGu
      * the request ID is a hash over the content of the userOp (except the signature), the entrypoint and the chainid.
      */
     function getUserOpHash(UserOperation calldata userOp) public view returns (bytes32) {
-        return bytes32(uint256(2));
-        // return keccak256(abi.encode(userOp.hash(), address(this), block.chainid));
+        return keccak256(abi.encode(userOp.hash(), address(this), block.chainid));
     }
 
     /**

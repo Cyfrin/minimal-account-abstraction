@@ -53,7 +53,9 @@ contract HelperConfig is Script {
                                 CONFIGS
     //////////////////////////////////////////////////////////////*/
     function getEthMainnetConfig() public pure returns (NetworkConfig memory) {
-        return NetworkConfig({ entryPoint: 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789 });
+        // This was the v0.6 address
+        // return NetworkConfig({ entryPoint: 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789 });
+        return NetworkConfig({ entryPoint: 0x0000000071727De22E5E9d8BAf0edAc6f37da032 });
     }
 
     function getZkSyncConfig() public pure returns (NetworkConfig memory) {
