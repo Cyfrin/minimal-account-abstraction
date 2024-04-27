@@ -39,3 +39,5 @@ aderyn :; aderyn .
 
 # How we got the mock entrypoint contract so quick
 getEntryPoint :; forge clone -c 1 --etherscan-api-key ${ETHERSCAN_API_KEY} 0x0000000071727De22E5E9d8BAf0edAc6f37da032 --no-git
+
+flattenClone :; forge flatten src/core/EntryPoint.sol > MockEntryPoint.sol
