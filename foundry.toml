@@ -48,8 +48,8 @@ sepolia = { key = "${API_KEY_ETHERSCAN}" }
 
 
 [rpc_endpoints]
-# example:
-# zksync = "https://mainnet.era.zksync.io"
+zksync = "https://mainnet.era.zksync.io"
+mainnet = "${MAINNET_RPC_URL}"           # uses the MAINNET_RPC_URL environment variable
 
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

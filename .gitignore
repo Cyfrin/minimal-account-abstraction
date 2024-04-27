@@ -12,3 +12,10 @@ docs/
 
 # Dotenv file
 .env
+
+# Python 
+.venv/
+
+# zkSync
+zkout/
+debugger/

@@ -3,6 +3,7 @@
 - [Account Abstraction](#account-abstraction)
   - [What is Account Abstraction?](#what-is-account-abstraction)
   - [What's this repo show?](#whats-this-repo-show)
+  - [Stats](#stats)
 - [Acknowledgements](#acknowledgements)
 
 ## What is Account Abstraction?
@@ -23,7 +24,12 @@ Right now, every single transaction in web3 stems from a single private key.
 1. A minimal EVM "Smart Wallet" using alt-mempool AA
 2. A minimal zkSync "Smart Wallet" using native AA
 
+## Stats
+- [Types of AAs on different chains](https://www.bundlebear.com/factories/all)
+
 # Acknowledgements 
 
-- [eth-infinitism](https://github.com/eth-infinitism/account-abstraction)
+- [eth-infinitism](https://github.com/eth-infinitism/account-abstraction/)
 - [Dan Nolan](https://www.youtube.com/watch?v=b4KWkIAPa3U)
+- [zerodevapp](https://github.com/zerodevapp/kernel/)
+- [Alchemy LightAccount](https://github.com/alchemyplatform/light-account/)

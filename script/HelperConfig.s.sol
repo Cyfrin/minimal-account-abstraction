@@ -2,6 +2,8 @@
 pragma solidity ^0.8.19;
 
 import { Script } from "forge-std/Script.sol";
+import { MockEntryPoint } from "test/mocks/MockEntryPoint.sol";
+import { console2 } from "forge-std/console2.sol";
 
 contract HelperConfig is Script {
     /*//////////////////////////////////////////////////////////////
@@ -63,6 +65,13 @@ contract HelperConfig is Script {
     }
 
     function getOrCreateAnvilEthConfig() public returns (NetworkConfig memory) {
-        return NetworkConfig();
+        if (localNetworkConfig.entryPoint != address(0)) {
+            return localNetworkConfig;
+        }
+
+        MockEntryPoint entryPoint = new MockEntryPoint();
+        console2.log("Created new entry point: ", address(entryPoint));
+        localNetworkConfig = NetworkConfig({ entryPoint: address(entryPoint) });
+        return localNetworkConfig;
     }
 }

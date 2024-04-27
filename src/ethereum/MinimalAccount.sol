@@ -2,11 +2,12 @@
 // Inspired by https://github.com/eth-infinitism/account-abstraction/blob/develop/contracts/samples/SimpleAccount.sol
 pragma solidity 0.8.24;
 
-// Internal Imports
-import { IAccount } from "./interfaces/IAccount.sol";
-import { IEntryPoint } from "./interfaces/IEntryPoint.sol";
-import { UserOperationLib, IPackedUserOperation } from "./UserOperationLib.sol";
-import { SIG_VALIDATION_FAILED, SIG_VALIDATION_SUCCESS } from "./Helpers.sol";
+// AccountAbstraction Imports
+import { IAccount } from "lib/account-abstraction/contracts/interfaces/IAccount.sol";
+import { IEntryPoint } from "lib/account-abstraction/contracts/interfaces/IEntryPoint.sol";
+import { UserOperationLib } from "lib/account-abstraction/contracts/core/UserOperationLib.sol";
+import { SIG_VALIDATION_FAILED, SIG_VALIDATION_SUCCESS } from "lib/account-abstraction/contracts/core/Helpers.sol";
+import { PackedUserOperation } from "lib/account-abstraction/contracts/interfaces/PackedUserOperation.sol";
 // OZ Imports
 import { MessageHashUtils } from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
@@ -16,9 +17,10 @@ import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
  * Minimal account based on account abstraction.
  */
 contract MinimalAccount is Ownable, IAccount {
-    using UserOperationLib for IPackedUserOperation.PackedUserOperation;
+    using UserOperationLib for PackedUserOperation;
 
     error MinimalAccount__NotFromEntryPoint();
+    error MinimalAccount__NotFromEntryPointOrOwner();
 
     /*//////////////////////////////////////////////////////////////
                             STATE VARIABLES
@@ -35,6 +37,13 @@ contract MinimalAccount is Ownable, IAccount {
         _;
     }
 
+    modifier requireFromEntryPointOrOwner() {
+        if (msg.sender != address(i_entryPoint) && msg.sender != owner()) {
+            revert MinimalAccount__NotFromEntryPointOrOwner();
+        }
+        _;
+    }
+
     /*//////////////////////////////////////////////////////////////
                                FUNCTIONS
     //////////////////////////////////////////////////////////////*/
@@ -42,9 +51,12 @@ contract MinimalAccount is Ownable, IAccount {
         i_entryPoint = IEntryPoint(entryPoint);
     }
 
+    /*//////////////////////////////////////////////////////////////
+                          FUNCTIONS - EXTERNAL
+    //////////////////////////////////////////////////////////////*/
     /// @inheritdoc IAccount
     function validateUserOp(
-        IPackedUserOperation.PackedUserOperation calldata userOp,
+        PackedUserOperation calldata userOp,
         bytes32 userOpHash,
         uint256 missingAccountFunds
     )
@@ -60,6 +72,24 @@ contract MinimalAccount is Ownable, IAccount {
     }
 
     /**
+     * execute a transaction (called directly from owner, or by entryPoint)
+     * @param dest destination address to call
+     * @param value the value to pass in this call
+     * @param func the calldata to pass in this call
+     */
+    function execute(address dest, uint256 value, bytes calldata func) external requireFromEntryPointOrOwner {
+        (bool success, bytes memory result) = dest.call{ value: value }(func);
+        if (!success) {
+            assembly {
+                revert(add(result, 32), mload(result))
+            }
+        }
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                          FUNCTIONS - INTERNAL
+    //////////////////////////////////////////////////////////////*/
+    /**
      * Validate the signature is valid for this message.
      * @param userOp          - Validate the userOp.signature field.
      * @param userOpHash      - Convenient field: the hash of the request, to check the signature against.
@@ -74,7 +104,7 @@ contract MinimalAccount is Ownable, IAccount {
      *                          Note that the validation code cannot use block.timestamp (or block.number) directly.
      */
     function _validateSignature(
-        IPackedUserOperation.PackedUserOperation calldata userOp,
+        PackedUserOperation calldata userOp,
         bytes32 userOpHash
     )
         internal
@@ -137,5 +167,19 @@ contract MinimalAccount is Ownable, IAccount {
      */
     function getNonce() public view virtual returns (uint256) {
         return i_entryPoint.getNonce(address(this), 0);
+    }
+
+    /**
+     * check current account deposit in the entryPoint
+     */
+    function getDeposit() public view returns (uint256) {
+        return i_entryPoint.balanceOf(address(this));
+    }
+
+    /**
+     * deposit more funds for this account in the entryPoint
+     */
+    function addDeposit() public payable {
+        i_entryPoint.depositTo{ value: msg.value }(address(this));
     }
 }

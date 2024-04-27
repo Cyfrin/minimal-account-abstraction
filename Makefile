@@ -21,7 +21,9 @@ build:; forge build
 
 test :; forge test 
 
-snapshot :; forge snapshot
+testFork :; forge test --fork-url mainnet
+
+snapshot :; forge snapshot 
 
 format :; forge fmt
 
@@ -34,3 +36,6 @@ scope :; tree ./src/ | sed 's/└/#/g; s/──/--/g; s/├/#/g; s/│ /|/g; s/�
 scopefile :; @tree ./src/ | sed 's/└/#/g' | awk -F '── ' '!/\.sol$$/ { path[int((length($$0) - length($$2))/2)] = $$2; next } { p = "src"; for(i=2; i<=int((length($$0) - length($$2))/2); i++) if (path[i] != "") p = p "/" path[i]; print p "/" $$2; }' > scope.txt
 
 aderyn :; aderyn .
+
+# How we got the mock entrypoint contract so quick
+getEntryPoint :; forge clone -c 1 --etherscan-api-key ${ETHERSCAN_API_KEY} 0x5ff137d4b0fdcd49dca30c7cf57e578a026d2789 --no-git
