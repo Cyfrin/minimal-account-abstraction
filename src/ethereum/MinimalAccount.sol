@@ -51,6 +51,8 @@ contract MinimalAccount is Ownable, IAccount {
         i_entryPoint = IEntryPoint(entryPoint);
     }
 
+    receive() external payable { }
+
     /*//////////////////////////////////////////////////////////////
                           FUNCTIONS - EXTERNAL
     //////////////////////////////////////////////////////////////*/

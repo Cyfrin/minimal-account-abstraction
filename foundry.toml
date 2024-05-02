@@ -3,11 +3,10 @@ src = "src"
 out = "out"
 libs = ["lib"]
 solc = "0.8.24"
-remappings = ['@openzeppelin/contracts=lib/openzeppelin-contracts/contracts']
-# fs_permissions = [
-#     { access = "read", path = "./broadcast" },
-#     { access = "read", path = "./reports" },
-# ]
+remappings = [
+    '@openzeppelin/contracts=lib/openzeppelin-contracts/contracts',
+    '@matterlabs/zksync-contracts/=lib/zksync-contracts/zksync-contracts/',
+]
 
 
 [fuzz]
@@ -36,20 +35,13 @@ wrap_comments = true
 
 [etherscan]
 # zksync = no keey needed for zksync
-arbitrum = { key = "${API_KEY_ARBISCAN}" }
-avalanche = { key = "${API_KEY_SNOWTRACE}" }
-bnb_smart_chain = { key = "${API_KEY_BSCSCAN}" }
-gnosis_chain = { key = "${API_KEY_GNOSISSCAN}" }
-goerli = { key = "${API_KEY_ETHERSCAN}" }
-mainnet = { key = "${API_KEY_ETHERSCAN}" }
-optimism = { key = "${API_KEY_OPTIMISTIC_ETHERSCAN}" }
-polygon = { key = "${API_KEY_POLYGONSCAN}" }
-sepolia = { key = "${API_KEY_ETHERSCAN}" }
-
+mainnet = { key = "${ETHERSCAN_API_KEY}" }
+arbitrum = { key = "${ARBITRUMSCAN_API_KEY}" }
 
 [rpc_endpoints]
 zksync = "https://mainnet.era.zksync.io"
 mainnet = "${MAINNET_RPC_URL}"           # uses the MAINNET_RPC_URL environment variable
+arbitrum = "${ARBITRUM_RPC_URL}"         # uses the ARBITRUM_RPC_URL environment variable
 
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

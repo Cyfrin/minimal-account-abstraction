@@ -17,7 +17,7 @@ install :; forge install foundry-rs/forge-std --no-commit && forge install openz
 # Update Dependencies
 update:; forge update
 
-build:; forge build
+build:; forge build --avoid-contracts BootloaderUtilities
 
 test :; forge test 
 
@@ -41,3 +41,13 @@ aderyn :; aderyn .
 getEntryPoint :; forge clone -c 1 --etherscan-api-key ${ETHERSCAN_API_KEY} 0x0000000071727De22E5E9d8BAf0edAc6f37da032 --no-git
 
 flattenClone :; forge flatten src/core/EntryPoint.sol > MockEntryPoint.sol
+
+deployEth :; forge script script/DeployMinimal.s.sol --rpc-url arbitrum --sender ${SMALL_MONEY_SENDER} --account smallmoney --broadcast --verify -vvvv
+
+verify :; forge verify-contract --etherscan-api-key ${ETHERSCAN_API_KEY} --rpc-url ${MAINNET_RPC_URL} XXX <PATH_TO_CONTRACT>
+
+getCalldata :; cast calldata "approve(address,uint256)" 0x9EA9b0cc1919def1A3CfAEF4F7A66eE3c36F86fC 100000000000000000000
+
+estimate :; cast estimate "approve(address,uint256)" "approve(address,uint256)" 0x9EA9b0cc1919def1A3CfAEF4F7A66eE3c36F86fC 100000000000000000000
+
+sendUserOp :; forge script script/SendPackedUserOp.s.sol --rpc-url arbitrum --sender ${SMALL_MONEY_SENDER} --account smallmoney --broadcast -vvvv
