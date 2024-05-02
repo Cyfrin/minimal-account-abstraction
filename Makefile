@@ -64,13 +64,13 @@ sendUserOp :; forge script script/SendPackedUserOp.s.sol --rpc-url arbitrum --se
 #                              ZKSYNC
 # //////////////////////////////////////////////////////////////*/
 
-buildZk:; forge build --zksync --via-ir
+buildZk:; forge build --zksync 
 
-testZk :; forge test --zksync --via-ir
+testZk :; forge test --zksync 
 
-testForkZk :; forge test --zksync --via-ir
+testForkZk :; forge test --zksync 
 
-snapshotZk :; forge snapshot --zksync --via-ir
+snapshotZk :; forge snapshot --zksync 
 
 # /*//////////////////////////////////////////////////////////////
 #                         ZKSYNC -SCRIPTS
