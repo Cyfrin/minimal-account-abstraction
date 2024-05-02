@@ -7,7 +7,7 @@ remappings = [
     '@openzeppelin/contracts=lib/openzeppelin-contracts/contracts',
     '@matterlabs/zksync-contracts/=lib/zksync-contracts/zksync-contracts/',
 ]
-
+via-ir = true
 
 [fuzz]
 runs = 1000

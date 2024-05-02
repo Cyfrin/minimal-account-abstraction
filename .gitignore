@@ -7,7 +7,6 @@ out/
 /broadcast/*/31337/
 /broadcast/**/dry-run/
 ./broadcast/*
-broadcast/
 
 # Docs
 docs/
@@ -20,5 +19,9 @@ docs/
 
 # zkSync
 zkout/
-debugger/
+
+# Patrick
+broadcast/
 .notes.md
+debugger/
+.vscode

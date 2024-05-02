@@ -17,6 +17,7 @@ contract DeployMinimal is Script {
 
     function deploy(address entryPoint) public returns (MinimalAccount) {
         MinimalAccount minimalAccount = new MinimalAccount(entryPoint);
+        minimalAccount.transferOwnership(msg.sender);
         return minimalAccount;
     }
 }
