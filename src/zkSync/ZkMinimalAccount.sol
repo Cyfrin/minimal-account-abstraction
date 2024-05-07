@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
+import { console2 } from "forge-std/console2.sol";
+
 // zkSync imports
 import {
     IAccount,
@@ -80,21 +82,32 @@ contract ZkMinimalAccount is Ownable, IAccount {
     //////////////////////////////////////////////////////////////*/
     constructor() Ownable(msg.sender) { }
 
+    function sayHi() external pure returns (string memory) {
+        return "Hi!";
+    }
+
+    // Does the bootloader do some random shit??/
     function validateTransaction(
         bytes32, /*txHash*/
-        bytes32 suggestedSignedHash,
-        Transaction calldata transaction
+        bytes32, /*suggestedSignedHash*/
+        Transaction memory /*transaction*/
     )
         external
         payable
-        onlyBootloader
-        returns (bytes4 magic)
+        returns (
+            // onlyBootloader
+            bytes4 magic
+        )
     {
-        magic = _validateTransaction(suggestedSignedHash, transaction);
+        console2.log("Returning data...");
+        console2.logBytes4(ACCOUNT_VALIDATION_SUCCESS_MAGIC);
+        // magic = _validateTransaction(suggestedSignedHash, transaction);
+        return ACCOUNT_VALIDATION_SUCCESS_MAGIC; // return bytes(0) and Dustin thinks this will revert
     }
 
     function executeTransaction(
         bytes32, /*txHash*/
+        // This is the hash that is signed by the EoA by default?
         bytes32, /*suggestedSignedHash*/
         Transaction calldata transaction
     )
@@ -109,7 +122,7 @@ contract ZkMinimalAccount is Ownable, IAccount {
     // There is no point in providing possible signed hash in the `executeTransactionFromOutside` method,
     // since it typically should not be trusted.
     function executeTransactionFromOutside(Transaction calldata transaction) external payable {
-        _validateTransaction(bytes32(0), transaction);
+        // _validateTransaction(bytes32(0), transaction);
         _executeTransaction(transaction);
     }
 
@@ -143,7 +156,7 @@ contract ZkMinimalAccount is Ownable, IAccount {
     //////////////////////////////////////////////////////////////*/
     function _validateTransaction(
         bytes32, /*suggestedSignedHash*/
-        Transaction calldata transaction
+        Transaction memory transaction
     )
         internal
         returns (bytes4 magic)

@@ -8,6 +8,13 @@ remappings = [
     '@matterlabs/zksync-contracts/=lib/zksync-contracts/zksync-contracts/',
 ]
 via-ir = true
+is-system = true
+
+[profile.zksync]
+src = 'src'
+libs = ['lib']
+fallback_oz = true
+mode = "3"
 
 [fuzz]
 runs = 1000
