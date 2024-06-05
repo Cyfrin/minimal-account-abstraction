@@ -7,6 +7,10 @@ remappings = [
     '@openzeppelin/contracts=lib/openzeppelin-contracts/contracts',
     '@matterlabs/zksync-contracts/=lib/zksync-contracts/zksync-contracts/',
 ]
+fs_permissions = [
+    { access = "read", path = "./broadcast" },
+    { access = "read", path = "./reports" },
+]
 via-ir = true
 is-system = true
 

@@ -12,7 +12,7 @@ clean  :; forge clean
 # Remove modules
 remove :; rm -rf .gitmodules && rm -rf .git/modules/* && rm -rf lib && touch .gitmodules && git add . && git commit -m "modules"
 
-install :; forge install foundry-rs/forge-std --no-commit && forge install openzeppelin/openzeppelin-contracts --no-commit && forge install eth-infinitism/account-abstraction --no-commit && forge install cyfrin/zksync-contracts --no-commit 
+install :; forge install foundry-rs/forge-std --no-commit && forge install openzeppelin/openzeppelin-contracts --no-commit && forge install eth-infinitism/account-abstraction --no-commit && forge install cyfrin/foundry-era-contracts@0.0.2 --no-commit 
 
 # Update Dependencies
 update:; forge update
@@ -64,13 +64,13 @@ sendUserOp :; forge script script/SendPackedUserOp.s.sol --rpc-url arbitrum --se
 #                              ZKSYNC
 # //////////////////////////////////////////////////////////////*/
 
-buildZk:; forge build --zksync 
+zkbuild:; forge build --zksync 
 
-testZk :; forge test --zksync 
+zktest :; forge test --zksync 
 
-testForkZk :; forge test --zksync 
+# testForkZk :; forge test --zksync 
 
-snapshotZk :; forge snapshot --zksync 
+# snapshotZk :; forge snapshot --zksync 
 
 # /*//////////////////////////////////////////////////////////////
 #                         ZKSYNC -SCRIPTS

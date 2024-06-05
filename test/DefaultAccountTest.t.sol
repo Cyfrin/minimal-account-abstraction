@@ -2,17 +2,18 @@
 pragma solidity 0.8.24;
 
 import { Test } from "forge-std/Test.sol";
-import { DefaultAccount } from "@matterlabs/zksync-contracts/l2/system-contracts/DefaultAccount.sol";
-import { DeployDefaultAccount } from "script/DeployDefaultAccount.s.sol";
 import { MockERC20 } from "test/mocks/MockERC20.sol";
-import { MemoryTransactionHelper, Transaction, EIP_1559_TX_TYPE } from "./helpers/MemoryTransactionHelper.t.sol";
+import {
+    MemoryTransactionHelper,
+    Transaction,
+    EIP_1559_TX_TYPE
+} from "lib/mock-era-contracts/src/system-contracts/contracts/libraries/MemoryTransactionHelper.sol";
 import { MessageHashUtils } from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 
 contract DefaultAccountTest is Test {
     using MessageHashUtils for bytes32;
     using MemoryTransactionHelper for Transaction;
 
-    DeployDefaultAccount deployer;
     DefaultAccount defaultAccount;
     MockERC20 mockERC20;
     address user;
@@ -23,13 +24,10 @@ contract DefaultAccountTest is Test {
     uint8 constant ZKSYNC_AA_TX_TYPE = 0x71;
 
     function setUp() public {
-        deployer = new DeployDefaultAccount();
         mockERC20 = new MockERC20();
+        // Every account in zkSync is technically a smart contract account!
         (user, userKey) = makeAddrAndKey("user");
         randomUser = payable(makeAddr("randomUser"));
-
-        vm.prank(user);
-        defaultAccount = deployer.deploy();
     }
 
     function testDefaultAccountCanExecuteCommands() public {

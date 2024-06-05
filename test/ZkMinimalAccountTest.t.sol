@@ -5,7 +5,11 @@ import { Test } from "forge-std/Test.sol";
 import { ZkMinimalAccount } from "src/zkSync/ZkMinimalAccount.sol";
 import { DeployZkMinimal } from "script/DeployZkMinimal.s.sol";
 import { MockERC20 } from "test/mocks/MockERC20.sol";
-import { Transaction, EIP_1559_TX_TYPE, MemoryTransactionHelper } from "./helpers/MemoryTransactionHelper.t.sol";
+import {
+    Transaction,
+    EIP_1559_TX_TYPE,
+    MemoryTransactionHelper
+} from "lib/mock-era-contracts/src/system-contracts/contracts/libraries/MemoryTransactionHelper.sol";
 import { BOOTLOADER_FORMAL_ADDRESS } from "@matterlabs/zksync-contracts/l2/system-contracts/Constants.sol";
 import { MessageHashUtils } from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import { ACCOUNT_VALIDATION_SUCCESS_MAGIC } from
