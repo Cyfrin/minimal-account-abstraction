@@ -6,14 +6,14 @@ import { ZkMinimalAccount } from "src/zkSync/ZkMinimalAccount.sol";
 import { DeployZkMinimal } from "script/DeployZkMinimal.s.sol";
 import { MockERC20 } from "test/mocks/MockERC20.sol";
 import {
-    Transaction,
     EIP_1559_TX_TYPE,
+    Transaction,
     MemoryTransactionHelper
-} from "lib/mock-era-contracts/src/system-contracts/contracts/libraries/MemoryTransactionHelper.sol";
-import { BOOTLOADER_FORMAL_ADDRESS } from "@matterlabs/zksync-contracts/l2/system-contracts/Constants.sol";
+} from "lib/foundry-era-contracts/src/system-contracts/contracts/libraries/MemoryTransactionHelper.sol";
+import { BOOTLOADER_FORMAL_ADDRESS } from "lib/foundry-era-contracts/src/system-contracts/contracts/Constants.sol";
 import { MessageHashUtils } from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import { ACCOUNT_VALIDATION_SUCCESS_MAGIC } from
-    "@matterlabs/zksync-contracts/l2/system-contracts/interfaces/IAccount.sol";
+    "lib/foundry-era-contracts/src/system-contracts/contracts/interfaces/IAccount.sol";
 import { console2 } from "forge-std/console2.sol";
 
 contract ZkMinimalAccountTest is Test {
@@ -114,22 +114,22 @@ contract ZkMinimalAccountTest is Test {
         console2.log(response);
     }
 
-    // function testZkNonOwnerCanExecuteCommand() public {
-    //     // Arrange
-    //     address dest = address(mockERC20);
-    //     uint256 value = 0;
-    //     bytes memory func = abi.encodeWithSelector(MockERC20.mint.selector);
+    function testZkNonOwnerCanExecuteCommand() public {
+        // Arrange
+        address dest = address(mockERC20);
+        uint256 value = 0;
+        bytes memory func = abi.encodeWithSelector(MockERC20.mint.selector);
 
-    //     Transaction memory transaction = _getUnsignedTransaction(user, ZKSYNC_AA_TX_TYPE, dest, value, func);
-    //     transaction = _signTransaction(transaction, userKey);
+        Transaction memory transaction = _getUnsignedTransaction(user, ZKSYNC_AA_TX_TYPE, dest, value, func);
+        transaction = _signTransaction(transaction, userKey);
 
-    //     // Act
-    //     vm.prank(randomUser);
-    //     minimalAccount.executeTransactionFromOutside(transaction);
+        // Act
+        vm.prank(randomUser);
+        minimalAccount.executeTransactionFromOutside(transaction);
 
-    //     // Assert
-    //     assertEq(mockERC20.balanceOf(address(minimalAccount)), mockERC20.AMOUNT());
-    // }
+        // Assert
+        assertEq(mockERC20.balanceOf(address(minimalAccount)), mockERC20.AMOUNT());
+    }
 
     /*//////////////////////////////////////////////////////////////
                                 HELPERS

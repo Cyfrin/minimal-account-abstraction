@@ -7,22 +7,22 @@ import { console2 } from "forge-std/console2.sol";
 import {
     IAccount,
     ACCOUNT_VALIDATION_SUCCESS_MAGIC
-} from "@matterlabs/zksync-contracts/l2/system-contracts/interfaces/IAccount.sol";
+} from "lib/foundry-era-contracts/src/system-contracts/contracts/interfaces/IAccount.sol";
 import {
     Transaction,
-    TransactionHelper
-} from "@matterlabs/zksync-contracts/l2/system-contracts/libraries/TransactionHelper.sol";
+    MemoryTransactionHelper
+} from "lib/foundry-era-contracts/src/system-contracts/contracts/libraries/MemoryTransactionHelper.sol";
 import {
     BOOTLOADER_FORMAL_ADDRESS,
     NONCE_HOLDER_SYSTEM_CONTRACT,
     DEPLOYER_SYSTEM_CONTRACT
-} from "@matterlabs/zksync-contracts/l2/system-contracts/Constants.sol";
+} from "lib/foundry-era-contracts/src/system-contracts/contracts/Constants.sol";
 import { SystemContractsCaller } from
-    "@matterlabs/zksync-contracts/l2/system-contracts/libraries/SystemContractsCaller.sol";
-import { INonceHolder } from "@matterlabs/zksync-contracts/l2/system-contracts/interfaces/INonceHolder.sol";
-import { Utils } from "@matterlabs/zksync-contracts/l2/system-contracts/libraries/Utils.sol";
+    "lib/foundry-era-contracts/src/system-contracts/contracts/libraries/SystemContractsCaller.sol";
+import { INonceHolder } from "lib/foundry-era-contracts/src/system-contracts/contracts/interfaces/INonceHolder.sol";
+import { Utils } from "lib/foundry-era-contracts/src/system-contracts/contracts/libraries/Utils.sol";
 import { SystemContractHelper } from
-    "@matterlabs/zksync-contracts/l2/system-contracts/libraries/SystemContractHelper.sol";
+    "lib/foundry-era-contracts/src/system-contracts/contracts/libraries/SystemContractHelper.sol";
 
 // OZ Imports
 import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
@@ -30,7 +30,7 @@ import { MessageHashUtils } from "@openzeppelin/contracts/utils/cryptography/Mes
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 
 contract ZkMinimalAccount is Ownable, IAccount {
-    using TransactionHelper for Transaction;
+    using MemoryTransactionHelper for Transaction;
 
     /*//////////////////////////////////////////////////////////////
                                  ERRORS
@@ -212,7 +212,7 @@ contract ZkMinimalAccount is Ownable, IAccount {
     /*//////////////////////////////////////////////////////////////
                              VIEW AND PURE
     //////////////////////////////////////////////////////////////*/
-    function _isValidSignature(bytes calldata signature, bytes32 transactionHash) internal view returns (bool) {
+    function _isValidSignature(bytes memory signature, bytes32 transactionHash) internal view returns (bool) {
         bytes32 hash = MessageHashUtils.toEthSignedMessageHash(transactionHash);
         if (owner() != ECDSA.recover(hash, signature)) {
             return false;
