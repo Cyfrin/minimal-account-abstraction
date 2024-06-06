@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
-import { console2 } from "forge-std/console2.sol";
-
 // zkSync imports
 import {
     IAccount,
@@ -30,6 +28,7 @@ import { MessageHashUtils } from "@openzeppelin/contracts/utils/cryptography/Mes
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 
 contract ZkMinimalAccount is Ownable, IAccount {
+    // Ideally we use the calldata edition in a future version
     using MemoryTransactionHelper for Transaction;
 
     /*//////////////////////////////////////////////////////////////
@@ -37,9 +36,11 @@ contract ZkMinimalAccount is Ownable, IAccount {
     //////////////////////////////////////////////////////////////*/
     error ZkMinimalAccount__OnlyBootloader();
     error ZkMinimalAccount__FailedToPay();
+    error ZkMinimalAccount__NotEnoughMoneyInMinimalAccount();
     error ZkMinimalAccount__InvalidSignature();
     error ZkMinimalAccount__ExecutionFailed();
     error ZkMinimalAccount__NotFromBootloaderOrOwner();
+    error ZkMinimalAccount__NotFromBootloader();
 
     /*//////////////////////////////////////////////////////////////
                                MODIFIERS
@@ -58,50 +59,22 @@ contract ZkMinimalAccount is Ownable, IAccount {
         _;
     }
 
-    // /**
-    //  * @dev Simulate the behavior of the EOA if it is called via `delegatecall`.
-    //  * Thus, the default account on a delegate call behaves the same as EOA on Ethereum.
-    //  * If all functions will use this modifier AND the contract will implement an empty payable fallback()
-    //  * then the contract will be indistinguishable from the EOA when called.
-    //  */
-    // modifier ignoreInDelegateCall() {
-    //     address codeAddress = SystemContractHelper.getCodeAddress();
-    //     if (codeAddress != address(this)) {
-    //         // If the function was delegate called, behave like an EOA.
-    //         assembly {
-    //             return(0, 0)
-    //         }
-    //     }
-
-    //     // Continue execution if not delegate called.
-    //     _;
-    // }
-
     /*//////////////////////////////////////////////////////////////
                                FUNCTIONS
     //////////////////////////////////////////////////////////////*/
     constructor() Ownable(msg.sender) { }
 
-    function sayHi() external pure returns (string memory) {
-        return "Hi!";
-    }
-
-    // Does the bootloader do some random shit??/
     function validateTransaction(
         bytes32, /*txHash*/
         bytes32, /*suggestedSignedHash*/
-        Transaction memory /*transaction*/
+        Transaction memory transaction
     )
         external
         payable
-        returns (
-            // onlyBootloader
-            bytes4 magic
-        )
+        onlyBootloader
+        returns (bytes4 magic)
     {
-        console2.log("Returning data...");
-        console2.logBytes4(ACCOUNT_VALIDATION_SUCCESS_MAGIC);
-        // magic = _validateTransaction(suggestedSignedHash, transaction);
+        magic = _validateTransaction(bytes32(0), transaction);
         return ACCOUNT_VALIDATION_SUCCESS_MAGIC; // return bytes(0) and Dustin thinks this will revert
     }
 
@@ -113,7 +86,6 @@ contract ZkMinimalAccount is Ownable, IAccount {
     )
         external
         payable
-        // ignoreInDelegateCall
         requireFromBootloaderOrOwner
     {
         _executeTransaction(transaction);
@@ -122,7 +94,7 @@ contract ZkMinimalAccount is Ownable, IAccount {
     // There is no point in providing possible signed hash in the `executeTransactionFromOutside` method,
     // since it typically should not be trusted.
     function executeTransactionFromOutside(Transaction calldata transaction) external payable {
-        // _validateTransaction(bytes32(0), transaction);
+        _validateTransaction(bytes32(0), transaction);
         _executeTransaction(transaction);
     }
 
@@ -154,6 +126,11 @@ contract ZkMinimalAccount is Ownable, IAccount {
     /*//////////////////////////////////////////////////////////////
                           FUNCTIONS - INTERNAL
     //////////////////////////////////////////////////////////////*/
+    /**
+     * @param - in the future, they may not support sending the signed hash. This is a parameter for convience
+     * only.
+     * @param transaction - the transaction to validate
+     */
     function _validateTransaction(
         bytes32, /*suggestedSignedHash*/
         Transaction memory transaction
@@ -167,7 +144,7 @@ contract ZkMinimalAccount is Ownable, IAccount {
         // Check for fee to pay
         uint256 totalRequiredBalance = transaction.totalRequiredBalance();
         if (totalRequiredBalance > address(this).balance) {
-            revert ZkMinimalAccount__FailedToPay();
+            revert ZkMinimalAccount__NotEnoughMoneyInMinimalAccount();
         }
 
         // Check signature
@@ -207,6 +184,19 @@ contract ZkMinimalAccount is Ownable, IAccount {
             0,
             abi.encodeCall(INonceHolder.incrementMinNonceIfEquals, (nonce))
         );
+    }
+
+    fallback() external {
+        // fallback of default account shouldn't be called by bootloader under no circumstances
+        if (msg.sender == BOOTLOADER_FORMAL_ADDRESS) {
+            revert ZkMinimalAccount__NotFromBootloader();
+        }
+    }
+
+    receive() external payable {
+        // If the contract is called directly, behave like an EOA.
+        // Note, that is okay if the bootloader sends funds with no calldata as it may be used for refunds/operator
+        // payments
     }
 
     /*//////////////////////////////////////////////////////////////

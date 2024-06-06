@@ -29,6 +29,7 @@ Right now, every single transaction in web3 stems from a single private key.
 - [Vitalik Buterin](https://ethereum-magicians.org/t/implementing-account-abstraction-as-part-of-eth1-x/4020)
 - [EntryPoint Contract v0.6](https://etherscan.io/address/0x5ff137d4b0fdcd49dca30c7cf57e578a026d2789)
 - [EntryPoint Contract v0.7](https://etherscan.io/address/0x0000000071727De22E5E9d8BAf0edAc6f37da032)
+- [zkSync AA Transaction Flow](https://docs.zksync.io/build/developer-reference/account-abstraction.html#the-transaction-flow)
 
 ## What's this repo show?
 
@@ -73,7 +74,7 @@ make test
 # Example Deployments
 
 ## zkSync
-- TODO
+
 
 ## Ethereum (Arbitrum)
 - [Minimal Account](https://arbiscan.io/address/0x03Ad95a54f02A40180D45D76789C448024145aaF#code)
@@ -83,6 +84,7 @@ make test
 - [Types of AAs on different chains](https://www.bundlebear.com/factories/all)
 - [eth-infinitism](https://github.com/eth-infinitism/account-abstraction/)
 - [Dan Nolan](https://www.youtube.com/watch?v=b4KWkIAPa3U)
+  - [Twitter Video](https://x.com/BeingDanNolan/status/1795848790043218029)
 - [zerodevapp](https://github.com/zerodevapp/kernel/)
 - [Alchemy LightAccount](https://github.com/alchemyplatform/light-account/)
 

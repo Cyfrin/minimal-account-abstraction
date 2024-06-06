@@ -14,13 +14,16 @@ import { BOOTLOADER_FORMAL_ADDRESS } from "lib/foundry-era-contracts/src/system-
 import { MessageHashUtils } from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import { ACCOUNT_VALIDATION_SUCCESS_MAGIC } from
     "lib/foundry-era-contracts/src/system-contracts/contracts/interfaces/IAccount.sol";
+import { ZkSyncChainChecker } from "lib/foundry-devops/src/ZkSyncChainChecker.sol";
+
 import { console2 } from "forge-std/console2.sol";
 
-contract ZkMinimalAccountTest is Test {
+contract ZkMinimalAccountTest is Test, ZkSyncChainChecker {
     using MemoryTransactionHelper for Transaction;
     using MessageHashUtils for bytes32;
 
-    address TEST_BOOTLOADER_FORMAL_ADDRESS = 0x0000000000000000000000000000000000009001;
+    address TEST_BOOTLOADER_FORMAL_ADDRESS = 0x0000000000000000000000000000000000009001; // dummy address
+    uint256 PAY_FOR_TRANSACTION_VALUE = 1e18;
 
     DeployZkMinimal deployer;
     ZkMinimalAccount minimalAccount;
@@ -38,8 +41,17 @@ contract ZkMinimalAccountTest is Test {
         (user, userKey) = makeAddrAndKey("user");
         randomUser = payable(makeAddr("randomUser"));
 
-        vm.prank(user);
-        minimalAccount = deployer.deploy();
+        // --zksync doesn't work well with scripts
+        if (!isZkSyncChain()) {
+            vm.prank(user);
+            minimalAccount = deployer.deploy();
+        } else {
+            vm.prank(user);
+            minimalAccount = new ZkMinimalAccount();
+        }
+
+        // Give to our minimalAccount to pay for the account abstraction
+        vm.deal(address(minimalAccount), PAY_FOR_TRANSACTION_VALUE);
         assertEq(minimalAccount.owner(), user);
     }
 
@@ -105,13 +117,6 @@ contract ZkMinimalAccountTest is Test {
 
         // Assert
         assertEq(magic, ACCOUNT_VALIDATION_SUCCESS_MAGIC);
-    }
-
-    function testHi() public {
-        // We can prank the bootloader...????
-        vm.prank(TEST_BOOTLOADER_FORMAL_ADDRESS);
-        string memory response = minimalAccount.sayHi();
-        console2.log(response);
     }
 
     function testZkNonOwnerCanExecuteCommand() public {

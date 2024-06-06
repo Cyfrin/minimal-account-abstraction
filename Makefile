@@ -3,6 +3,7 @@
 .PHONY: all test clean deploy fund help install snapshot format anvil scopefile
 
 DEFAULT_ANVIL_KEY := 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+DEFAULT_ZKSYNC_LOCAL_KEY := 0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110
 
 all: remove install build
 
@@ -12,7 +13,7 @@ clean  :; forge clean
 # Remove modules
 remove :; rm -rf .gitmodules && rm -rf .git/modules/* && rm -rf lib && touch .gitmodules && git add . && git commit -m "modules"
 
-install :; forge install foundry-rs/forge-std@1.8.2 --no-commit && forge install openzeppelin/openzeppelin-contracts@v5.0.2 --no-commit && forge install eth-infinitism/account-abstraction@v0.7 --no-commit && forge install cyfrin/foundry-era-contracts@0.0.3 --no-commit 
+install :; forge install foundry-rs/forge-std@v1.8.2 --no-commit && forge install openzeppelin/openzeppelin-contracts@v5.0.2 --no-commit && forge install eth-infinitism/account-abstraction@v0.7.0 --no-commit && forge install cyfrin/foundry-era-contracts@0.0.3 --no-commit && forge install cyfrin/foundry-devops@0.2.2 --no-commit
 
 # Update Dependencies
 update:; forge update
@@ -23,16 +24,15 @@ anvil :; anvil -m 'test test test test test test test test test test test junk' 
 
 slither :; slither . --config-file slither.config.json --checklist 
 
+aderyn :; aderyn .
+
 scope :; tree ./src/ | sed 's/└/#/g; s/──/--/g; s/├/#/g; s/│ /|/g; s/│/|/g'
 
 scopefile :; @tree ./src/ | sed 's/└/#/g' | awk -F '── ' '!/\.sol$$/ { path[int((length($$0) - length($$2))/2)] = $$2; next } { p = "src"; for(i=2; i<=int((length($$0) - length($$2))/2); i++) if (path[i] != "") p = p "/" path[i]; print p "/" $$2; }' > scope.txt
 
-aderyn :; aderyn .
-
 # /*//////////////////////////////////////////////////////////////
 #                               EVM
 # //////////////////////////////////////////////////////////////*/
-
 build:; forge build 
 
 test :; forge test
@@ -44,7 +44,6 @@ snapshot :; forge snapshot
 # /*//////////////////////////////////////////////////////////////
 #                          EVM - SCRIPTS
 # //////////////////////////////////////////////////////////////*/
-
 # How we got the mock entrypoint contract so quick
 getEntryPoint :; forge clone -c 1 --etherscan-api-key ${ETHERSCAN_API_KEY} 0x0000000071727De22E5E9d8BAf0edAc6f37da032 --no-git
 
@@ -63,22 +62,18 @@ sendUserOp :; forge script script/SendPackedUserOp.s.sol --rpc-url arbitrum --se
 # /*//////////////////////////////////////////////////////////////
 #                              ZKSYNC
 # //////////////////////////////////////////////////////////////*/
-
 zkbuild:; forge build --zksync 
 
 zktest :; forge test --zksync 
 
-# testForkZk :; forge test --zksync 
+zkanvil :; npx zksync-cli dev start
 
-# snapshotZk :; forge snapshot --zksync 
+zkdeploy :; forge create src/zkSync/ZkMinimalAccount.sol:ZkMinimalAccount --rpc-url http://127.0.0.1:8011 --private-key $(DEFAULT_ZKSYNC_LOCAL_KEY) --legacy --zksync
+
+zkdeploy-sepolia :; forge create src/zkSync/ZkMinimalAccount.sol:ZkMinimalAccount --rpc-url $(ZKSYNC_SEPOLIA_RPC_URL) --account $(ACCOUNT) --legacy --zksync
+
+
 
 # /*//////////////////////////////////////////////////////////////
 #                         ZKSYNC -SCRIPTS
 # //////////////////////////////////////////////////////////////*/
-
-
-# /*//////////////////////////////////////////////////////////////
-#                         DEFAULT ACCOUNT
-# //////////////////////////////////////////////////////////////*/
-
-deployDefaultAccount :; forge script script/DeployDefaultAccount.s.sol --zksync --rpc-url zksync --sender ${SMALL_MONEY_SENDER} --account smallmoney --broadcast --verify -vvvv
