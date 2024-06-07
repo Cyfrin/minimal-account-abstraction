@@ -56,9 +56,9 @@ contract ZkMinimalAccountTest is Test, ZkSyncChainChecker {
     }
 
     /*
-     * This is an example flow of the smart wallet owner calling a function on the smart wallet.
-     * This is reminiscent of the flow of a multi-sig contract wallet, with 1 signer.
-     */
+    * This is an example flow of the smart wallet owner calling a function on the smart wallet.
+    * This is reminiscent of the flow of a multi-sig contract wallet, with 1 signer.
+    */
     function testZkOwnerCanExecuteCommands() public {
         // Arrange
         address dest = address(mockERC20);
@@ -137,7 +137,7 @@ contract ZkMinimalAccountTest is Test, ZkSyncChainChecker {
     }
 
     /*//////////////////////////////////////////////////////////////
-                                HELPERS
+                            HELPERS
     //////////////////////////////////////////////////////////////*/
     function _getUnsignedTransaction(
         address from,

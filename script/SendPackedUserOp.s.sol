@@ -28,7 +28,8 @@ contract SendPackedUserOp is Script {
         bytes memory funcData = abi.encodeWithSelector(IERC20.approve.selector, SOMEONE_TO_APPROVE, AMOUNT_TO_APPROVE);
         bytes memory executeCalldata = abi.encodeWithSelector(MinimalAccount.execute.selector, dest, value, funcData);
 
-        // Don't do this, it's for demo purposes only
+        // Don't do this, it's for demo purposes only. Always use an encrypted key.
+        // Ideally, you'd sign your transaction with a cast bash script.
         PackedUserOperation memory userOp = _getSignedOp(executeCalldata, vm.envUint("SMALL_MONEY_KEY"));
         PackedUserOperation[] memory ops = new PackedUserOperation[](1);
         ops[0] = userOp;

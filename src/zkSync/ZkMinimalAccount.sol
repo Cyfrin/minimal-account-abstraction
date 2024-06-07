@@ -27,12 +27,34 @@ import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import { MessageHashUtils } from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 
+/**
+ * @title ZkMinimalAccount
+ * @author Patrick Collins
+ * @notice This code is for demo purposes only
+ * @dev The lifecycle of a type 113 (account abstraction aka 0x71) transaction is as follows:
+ *
+ * Phase 1: Validation
+ * 1. The user sends the transaction to the "zkSync API client" (sort of a "light node")
+ * Note: For phase 1 and phase 2, the msg.sender is the bootloader
+ * 2. The zkSync API client checks to see the the nonce is unique by querying the NonceHolder system contract
+ * 3. The zkSync API client calls validateTransaction, which MUST update the nonce
+ * 4. The zkSync API client checks the nonce is updated
+ * 5. The zkSync API client calls payForTransaction, or prepareForPaymaster & validateAndPayForPaymasterTransaction
+ * to see if the account can pay
+ * 6. The zkSync API client verifies that the bootloader gets paid
+ *
+ * Phase 2: Execution
+ * 7. The zkSync API client passes the validated transaction to the main node / sequencer (as of today, they are the
+ * same node)
+ * 8. The main node calls executeTransaction
+ * 9. If a paymaster was used, the postTransaction is called
+ */
 contract ZkMinimalAccount is Ownable, IAccount {
     // Ideally we use the calldata edition in a future version
     using MemoryTransactionHelper for Transaction;
 
     /*//////////////////////////////////////////////////////////////
-                                 ERRORS
+                             ERRORS
     //////////////////////////////////////////////////////////////*/
     error ZkMinimalAccount__OnlyBootloader();
     error ZkMinimalAccount__FailedToPay();
@@ -43,7 +65,7 @@ contract ZkMinimalAccount is Ownable, IAccount {
     error ZkMinimalAccount__NotFromBootloader();
 
     /*//////////////////////////////////////////////////////////////
-                               MODIFIERS
+                           MODIFIERS
     //////////////////////////////////////////////////////////////*/
     modifier onlyBootloader() {
         if (msg.sender != BOOTLOADER_FORMAL_ADDRESS) {
@@ -60,7 +82,7 @@ contract ZkMinimalAccount is Ownable, IAccount {
     }
 
     /*//////////////////////////////////////////////////////////////
-                               FUNCTIONS
+                           FUNCTIONS
     //////////////////////////////////////////////////////////////*/
     constructor() Ownable(msg.sender) { }
 
@@ -105,6 +127,7 @@ contract ZkMinimalAccount is Ownable, IAccount {
     )
         external
         payable
+        onlyBootloader
     {
         bool success = _transaction.payToTheBootloader();
         if (!success) {
@@ -124,7 +147,7 @@ contract ZkMinimalAccount is Ownable, IAccount {
     }
 
     /*//////////////////////////////////////////////////////////////
-                          FUNCTIONS - INTERNAL
+                      FUNCTIONS - INTERNAL
     //////////////////////////////////////////////////////////////*/
     /**
      * @param - in the future, they may not support sending the signed hash. This is a parameter for convience
@@ -200,7 +223,7 @@ contract ZkMinimalAccount is Ownable, IAccount {
     }
 
     /*//////////////////////////////////////////////////////////////
-                             VIEW AND PURE
+                         VIEW AND PURE
     //////////////////////////////////////////////////////////////*/
     function _isValidSignature(bytes memory signature, bytes32 transactionHash) internal view returns (bool) {
         bytes32 hash = MessageHashUtils.toEthSignedMessageHash(transactionHash);

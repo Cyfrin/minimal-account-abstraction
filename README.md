@@ -1,4 +1,5 @@
-*Note: This repo is not complete and a work in progress*
+> [!IMPORTANT]  
+> This repo is for demo purposes only. 
 
 # Account Abstraction
 
@@ -9,7 +10,11 @@
 - [Getting Started](#getting-started)
   - [Requirements](#requirements)
   - [Installation](#installation)
-  - [Quickstart](#quickstart)
+- [Quickstart](#quickstart)
+  - [Vanilla Foundry](#vanilla-foundry)
+    - [Deploy - Arbitrum](#deploy---arbitrum)
+    - [User operation - Arbitrum](#user-operation---arbitrum)
+  - [zkSync Foundry](#zksync-foundry)
 - [Example Deployments](#example-deployments)
   - [zkSync](#zksync)
   - [Ethereum (Arbitrum)](#ethereum-arbitrum)
@@ -65,16 +70,39 @@ cd minimal-account-abstraction
 make
 ```
 
-## Quickstart 
+# Quickstart 
+
+## Vanilla Foundry
 
 ```bash
+foundryup
 make test
+```
+
+### Deploy - Arbitrum
+
+```bash
+make deployEth
+```
+
+### User operation - Arbitrum
+
+```bash
+make sendUserOp
+```
+
+## zkSync Foundry
+
+```bash
+foundryup-zksync
+make zktest
 ```
 
 # Example Deployments
 
 ## zkSync
-
+- [ZkMinimal Account](https://explorer.zksync.io/address/0x1Ec2090975a6a497935891c25E7535893D9FEF7e)
+- [USDC Approval via native zkSync AA]()
 
 ## Ethereum (Arbitrum)
 - [Minimal Account](https://arbiscan.io/address/0x03Ad95a54f02A40180D45D76789C448024145aaF#code)

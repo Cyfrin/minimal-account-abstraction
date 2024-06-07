@@ -25,3 +25,14 @@ broadcast/
 .notes.md
 debugger/
 .vscode
+
+.encryptedKey.json
+.gitignore
+.devex_issues.md
+
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+.pnp/
+.pnp.js

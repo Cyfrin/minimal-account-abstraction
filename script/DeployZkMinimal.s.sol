@@ -6,6 +6,9 @@ import { ZkMinimalAccount } from "src/zkSync/ZkMinimalAccount.sol";
 import { HelperConfig } from "./HelperConfig.s.sol";
 
 contract DeployZkMinimal is Script {
+    /*//////////////////////////////////////////////////////////////
+               SCRIPTS DONT WORK WITH ZKSYNC AS OF TODAY
+    //////////////////////////////////////////////////////////////*/
     function run() public {
         vm.startBroadcast();
         deploy();
