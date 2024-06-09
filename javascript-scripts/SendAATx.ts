@@ -1,33 +1,65 @@
 import * as fs from "fs-extra"
-import { utils, Wallet, Provider, EIP712Signer, types, Contract } from "zksync-ethers"
+import { utils, Wallet, Provider, EIP712Signer, types, Contract, ContractFactory } from "zksync-ethers"
 import * as ethers from "ethers"
+import "dotenv/config"
 
+// Mainnet
+// const ZK_MINIMAL_ADDRESS = ""
+
+// Sepolia
+// const ZK_MINIMAL_ADDRESS = ""
+
+// Local
 // Update this!
-const ZK_MINIMAL_ADDRESS = "0x1Ec2090975a6a497935891c25E7535893D9FEF7e"
+const ZK_MINIMAL_ADDRESS = "0x1055780Bd25e2F698E7c9a95FBaf4cb565A23A14"
 
 // Update this too!
 const RANDOM_APPROVER = "0x9EA9b0cc1919def1A3CfAEF4F7A66eE3c36F86fC"
 
-// Don't update this!
-const USDC_ZKSYNC = "0x1d17CBcF0D6D143135aE902365D2E5e2A16538D4"
+// Mainnet
+// const USDC_ZKSYNC = "0x1d17CBcF0D6D143135aE902365D2E5e2A16538D4"
+// Sepolia
+// const USDC_ZKSYNC = "0x5249Fd99f1C1aE9B04C65427257Fc3B8cD976620"
+// Local
+let USDC_ZKSYNC = ""
+
 const AMOUNT_TO_APPROVE = "1000000"
 
 async function main() {
-    let provider = new Provider(process.env.ZKSYNC_RPC_URL!)
-    const encryptedJson = fs.readFileSync(".encryptedKey.json", "utf8")
-    let wallet = Wallet.fromEncryptedJsonSync(
-        encryptedJson,
-        process.env.PRIVATE_KEY_PASSWORD!
-    )
-    wallet = wallet.connect(provider)
-    const abi = JSON.parse(fs.readFileSync("./out/ZkMinimalAccount.sol/ZkMinimalAccount.json", "utf8"))["abi"]
+    console.log("Let's do this!")
 
+    // Local net
+    let provider = new Provider("http://127.0.0.1:8011")
+    let wallet = new Wallet(process.env.PRIVATE_KEY!)
+
+    // // Sepolia - Uncomment to use
+    // let provider = new Provider(process.env.ZKSYNC_SEPOLIA_RPC_URL!)
+    // const encryptedJson = fs.readFileSync(".encryptedKey.json", "utf8")
+    // let wallet = Wallet.fromEncryptedJsonSync(
+    //     encryptedJson,
+    //     process.env.PRIVATE_KEY_PASSWORD!
+    // )
+
+    // // Mainnet - Uncomment to use
+    // let provider = new Provider(process.env.ZKSYNC_RPC_URL!)
+    // const encryptedJson = fs.readFileSync(".encryptedKey.json", "utf8")
+    // let wallet = Wallet.fromEncryptedJsonSync(
+    //     encryptedJson,
+    //     process.env.PRIVATE_KEY_PASSWORD!
+    // )
+
+    wallet = wallet.connect(provider)
+
+    const abi = JSON.parse(fs.readFileSync("./out/ZkMinimalAccount.sol/ZkMinimalAccount.json", "utf8"))["abi"]
+    console.log("Setting up contract details...")
     const zkMinimalAccount = new Contract(ZK_MINIMAL_ADDRESS, abi, provider)
 
     // If this doesn't log the owner, you have an issue!
     console.log(`The owner of this minimal account is: `, await zkMinimalAccount.owner())
     const usdcAbi = JSON.parse(fs.readFileSync("./out/ERC20/IERC20.sol/IERC20.json", "utf8"))["abi"]
     const usdcContract = new Contract(USDC_ZKSYNC, usdcAbi, provider)
+
+    console.log("Populating transaction...")
     let aaTx = await usdcContract.approve.populateTransaction(
         RANDOM_APPROVER,
         AMOUNT_TO_APPROVE
@@ -54,17 +86,15 @@ async function main() {
     }
     const signedTxHash = EIP712Signer.getSignedDigest(aaTx)
 
+    console.log("Signing transaction...")
     const signature = ethers.concat([
         ethers.Signature.from(wallet.signingKey.sign(signedTxHash)).serialized,
     ])
-
 
     aaTx.customData = {
         ...aaTx.customData,
         customSignature: signature,
     }
-
-    console.log(aaTx)
 
     console.log(
         `The minimal account nonce before the first tx is ${await provider.getTransactionCount(
@@ -72,9 +102,6 @@ async function main() {
         )}`,
     )
 
-    // const sentTx = await provider.broadcastTransaction(
-    //     types.Transaction.from(aaTx).serialized
-    // )
     const sentTx = await provider.broadcastTransaction(
         types.Transaction.from(aaTx).serialized,
     )

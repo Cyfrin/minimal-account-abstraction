@@ -1,9 +1,10 @@
 -include .env
 
-.PHONY: all test clean deploy fund help install snapshot format anvil scopefile flatten
+.PHONY: all test clean deploy fund help install snapshot format anvil scopefile flatten encryptKey
 
 DEFAULT_ANVIL_KEY := 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
 DEFAULT_ZKSYNC_LOCAL_KEY := 0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110
+CONTRACT_DEPLOYER_MAINNET := 0x0000000000000000000000000000000000008006
 
 all: remove install build
 
@@ -22,7 +23,7 @@ format :; forge fmt
 
 anvil :; anvil -m 'test test test test test test test test test test test junk' --steps-tracing --block-time 1
 
-slither :; slither . --config-file slither.config.json --checklist 
+slither :; slither . --config-file slither.config.json 
 
 aderyn :; aderyn .
 
@@ -71,12 +72,15 @@ zktest :; forge test --zksync
 # //////////////////////////////////////////////////////////////*/
 zkanvil :; npx zksync-cli dev start
 
-zkdeploy :; forge create src/zkSync/ZkMinimalAccount.sol:ZkMinimalAccount --rpc-url http://127.0.0.1:8011 --private-key $(DEFAULT_ZKSYNC_LOCAL_KEY) --legacy --zksync
-
-zkdeploy-sepolia :; @forge create src/zkSync/ZkMinimalAccount.sol:ZkMinimalAccount --rpc-url $(ZKSYNC_SEPOLIA_RPC_URL) --account $(ACCOUNT) --legacy --zksync
-
 flatten :; tail -n +4 <(forge flatten src/zkSync/ZkMinimalAccount.sol) > ZkMinimalFlat.sol
 
-# https://mainnet.era.zksync.io might work best
-zkdeploy-mainnet :; @forge create ./ZkMinimalFlat.sol:ZkMinimalAccount --rpc-url $(ZKSYNC_RPC_URL) --account smallmoney --legacy --zksync
+encryptKey :; yarn encryptKey
 
+zkdeploy :; yarn deploy 
+
+sendTx :; yarn sendTx
+
+# zkdeploy :; forge create src/zkSync/ZkMinimalAccount.sol:ZkMinimalAccount --rpc-url http://127.0.0.1:8011 --private-key $(DEFAULT_ZKSYNC_LOCAL_KEY) --legacy --zksync
+
+# # Doesn't work! You need to directly interact with the contract deployer! 
+# zkdeploy-sepolia :; @forge create src/zkSync/ZkMinimalAccount.sol:ZkMinimalAccount --rpc-url $(ZKSYNC_SEPOLIA_RPC_URL) --account $(ACCOUNT) --legacy --zksync

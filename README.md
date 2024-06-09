@@ -15,9 +15,21 @@
     - [Deploy - Arbitrum](#deploy---arbitrum)
     - [User operation - Arbitrum](#user-operation---arbitrum)
   - [zkSync Foundry](#zksync-foundry)
+    - [Deploy - zkSync local network](#deploy---zksync-local-network)
+      - [Additional Requirements](#additional-requirements)
+      - [Setup - local node](#setup---local-node)
+      - [Deploy - local node](#deploy---local-node)
+    - [Deploy - zkSync Sepolia or Mainnet](#deploy---zksync-sepolia-or-mainnet)
 - [Example Deployments](#example-deployments)
-  - [zkSync](#zksync)
+  - [zkSync (Sepolia)](#zksync-sepolia)
   - [Ethereum (Arbitrum)](#ethereum-arbitrum)
+- [Account Abstraction zkSync Contract Deployment Flow](#account-abstraction-zksync-contract-deployment-flow)
+  - [First time](#first-time)
+  - [Subsequent times](#subsequent-times)
+- [FAQ](#faq)
+  - [What if I don't add the contract hash to factory deps?](#what-if-i-dont-add-the-contract-hash-to-factory-deps)
+  - [Why can't we do these deployments with foundry or cast?](#why-cant-we-do-these-deployments-with-foundry-or-cast)
+  - [Why can I use `forge create --legacy` to deploy a regular contract?](#why-can-i-use-forge-create---legacy-to-deploy-a-regular-contract)
 - [Acknowledgements](#acknowledgements)
 - [Disclaimer](#disclaimer)
 
@@ -51,7 +63,6 @@ Right now, every single transaction in web3 stems from a single private key.
 
 # Getting Started 
 
-
 ## Requirements
 
 - [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
@@ -60,7 +71,6 @@ Right now, every single transaction in web3 stems from a single private key.
   - You'll know you did it right if you can run `forge --version` and you see a response like `forge 0.2.0 (816e00b 2023-03-16T00:05:26.396218Z)`
 - [foundry-zksync](https://github.com/matter-labs/foundry-zksync)
   - You'll know you did it right if you can run `forge-zksync --help` and you see `zksync` somewhere in the output
-
 
 ## Installation
 
@@ -95,18 +105,146 @@ make sendUserOp
 
 ```bash
 foundryup-zksync
+make zkbuild
 make zktest
+```
+
+### Deploy - zkSync local network
+
+#### Additional Requirements
+- [npx & npm](https://docs.npmjs.com/cli/v10/commands/npm-install)
+  - You'll know you did it right if you can run `npm --version` and you see a response like `7.24.0` and `npx --version` and you see a response like `8.1.0`.
+- [yarn](https://classic.yarnpkg.com/lang/en/docs/install/#mac-stable)
+  - You'll know you did it right if you can run `yarn --version` and you see a response like `1.22.17`.
+- [docker](https://docs.docker.com/engine/install/)
+  - You'll know you did it right if you can run `docker --version` and you see a response like `Docker version 20.10.7, build f0df350`.
+  - Then, you'll want the daemon running, you'll know it's running if you can run `docker --info` and in the output you'll see something like the following to know it's running:
+```bash
+Client:
+ Context:    default
+ Debug Mode: false
+```
+
+Install dependencies:
+```bash
+yarn
+```
+
+#### Setup - local node
+
+```bash
+# Select `in memory node` and nothing else
+npx zksync-cli dev start
+```
+
+#### Deploy - local node
+
+> [!IMPORTANT]  
+> *Never* have a private key associated with real funds in plaintext. 
+
+```bash
+# Setup your .env file, see the .env.example for an example
+make zkdeploy
+```
+
+> Note: Sending an account abstraction transaction doesn't work on the local network, because we don't have the system contracts setup on the local network. 
+
+### Deploy - zkSync Sepolia or Mainnet
+
+Make sure your wallet has at least 0.01 zkSync ETH in it.
+
+1. Encrypt your key 
+
+Add your `PRIVATE_KEY` and `PRIVATE_KEY_PASSWORD` to your `.env` file, then run:
+
+```bash
+make encryptKey
+```
+
+> [!IMPORTANT]
+> NOW DELETE YOUR PRIVATE KEY AND PASSWORD FROM YOUR `.env` FILE!!!
+> Don't push your `.encryptedKey.json` up to GitHub either!
+
+1. Un-Comment the Sepolia or Mainnet section (depending on which you'd like to use) of `DeployZkMinimal.ts` and `SendAATx.ts`:
+
+```javascript
+// // Sepolia - uncomment to use
+```
+
+3. Deploy the contract
+```bash
+make zkdeploy
+```
+
+You'll get an output like:
+```
+zkMinimalAccount deployed to: 0x4768d649Da9927a8b3842108117eC0ca7Bc6953f
+With transaction hash: 0x103f6d894c20620dc632896799960d06ca37e722d20682ca824d428579ba157c
+```
+
+Grab the address of the `zkMinimalAccount` and add it to the `ZK_MINIMAL_ADDRESS` of `SendAATx.ts`.
+
+4. Fund your account
+
+Send it `0.005` zkSync sepolia ETH.
+
+5. Send an AA transaction
+
+```bash
+make sendTx
+```
+
+You'll get an out put like this:
+
+```
+Let's do this!
+Setting up contract details...
+The owner of this minimal account is:  0x643315C9Be056cDEA171F4e7b2222a4ddaB9F88D
+Populating transaction...
+Signing transaction...
+The minimal account nonce before the first tx is 0
+Transaction sent from minimal account with hash 0xec7800e3a01d5ba5e472396127b656f7058cdcc5a1bd292b2b49f76aa19548c8
+The account's nonce after the first tx is 1
 ```
 
 # Example Deployments
 
-## zkSync
-- [ZkMinimal Account](https://explorer.zksync.io/address/0x1Ec2090975a6a497935891c25E7535893D9FEF7e)
-- [USDC Approval via native zkSync AA]()
+## zkSync (Sepolia)
+- [ZkMinimal Account (Sepolia)](https://sepolia.explorer.zksync.io/address/0x5249Fd99f1C1aE9B04C65427257Fc3B8cD976620)
+- [USDC Approval via native zkSync AA (Sepolia)](https://sepolia.explorer.zksync.io/tx/0x43224b566a0b7497a26c57ab0fcea7d033dccd6cd6e16004523be0ce14fbd0fd)
+- [Contract Deployer](https://explorer.zksync.io/address/0x0000000000000000000000000000000000008006)
 
 ## Ethereum (Arbitrum)
 - [Minimal Account](https://arbiscan.io/address/0x03Ad95a54f02A40180D45D76789C448024145aaF#code)
 - [USDC Approval via EntryPoint](https://arbiscan.io/tx/0x03f99078176ace63d36c5d7119f9f1c8a74da61516616c43593162ff34d1154b#eventlog)
+
+# Account Abstraction zkSync Contract Deployment Flow
+
+## First time
+1. Calls `createAccount` or `create2Account` on the `CONTRACT_DEPLOYER` system contract 
+   1. This will deploy the contract *to the L1*.
+   2. Mark the contract hash in the `KnownCodesStorage` contract
+   3. Mark it as an AA contract 
+   4. [Example](https://sepolia.explorer.zksync.io/tx/0xec0d587903415b2785d542f8b41c21b82ad0613c226a8c83376ec2b8f90ffdd0#eventlog)
+      1. Notice 6 logs emitted? 
+
+## Subsequent times
+1. Calls `createAccount` or `create2Account` on the `CONTRACT_DEPLOYER` system contract 
+   1. The `CONTRACT_DEPLOYER` will check and see it's deployed this hash before
+   2. It will put in another system contract that this address is associated with the first has
+   3. [Example](https://sepolia.explorer.zksync.io/tx/0xe7a2a895d9854db5a6cc60df60524852d9957dd17adcc5720749f60b4da3eba7)
+      1. Only 3 logs emitted!
+   
+# FAQ
+
+## What if I don't add the contract hash to factory deps? 
+The transaction will revert. The `ContractDeployer` checks to see if it knows the hash, and if not, it will revert! The `ContractDeployer` calls the `KnownCodesStorage` contract, which keeps track of *every single contract hash deployed on the zkSync chain. Crazy right!*
+
+## Why can't we do these deployments with foundry or cast? 
+Foundry and cast don't have support for the `factoryDeps` transaction field, or support for type `113` transactions. 
+
+## Why can I use `forge create --legacy` to deploy a regular contract?
+`foundry-zksync` is smart enough to see a legacy deployment (when you send a transaction to the 0 address with data) and transform it into a contract call to the deployer. It's only smart enough for legacy deployments as of today, not the new `EIP-1559` type 2 transactions or account creation.
 
 # Acknowledgements 
 - [Types of AAs on different chains](https://www.bundlebear.com/factories/all)
