@@ -25,7 +25,7 @@ broadcast/
 .notes.md
 debugger/
 .vscode
-
+.DS_Store
 .encryptedKey.json
 .gitignore
 .devex_issues.md
