@@ -17,23 +17,25 @@ import {ACCOUNT_VALIDATION_SUCCESS_MAGIC} from
 // OZ Imports
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 
-contract ZkMinimalAccountTest is Test {
+// Foundry Devops
+import {ZkSyncChainChecker} from "lib/foundry-devops/src/ZkSyncChainChecker.sol";
+
+contract ZkMinimalAccountTest is Test, ZkSyncChainChecker {
     using MessageHashUtils for bytes32;
 
     ZkMinimalAccount minimalAccount;
     ERC20Mock usdc;
+    bytes4 constant EIP1271_SUCCESS_RETURN_VALUE = 0x1626ba7e;
 
     uint256 constant AMOUNT = 1e18;
     bytes32 constant EMPTY_BYTES32 = bytes32(0);
     address constant ANVIL_DEFAULT_ACCOUNT = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
-    uint256 constant PAY_AMOUNT = 1e18; // ADDED
 
     function setUp() public {
         minimalAccount = new ZkMinimalAccount();
         minimalAccount.transferOwnership(ANVIL_DEFAULT_ACCOUNT);
         usdc = new ERC20Mock();
-        vm.deal(address(minimalAccount), PAY_AMOUNT); // ADDED
-        assertEq(minimalAccount.owner(), ANVIL_DEFAULT_ACCOUNT); // ADDED
+        vm.deal(address(minimalAccount), AMOUNT);
     }
 
     function testZkOwnerCanExecuteCommands() public {
@@ -53,7 +55,8 @@ contract ZkMinimalAccountTest is Test {
         assertEq(usdc.balanceOf(address(minimalAccount)), AMOUNT);
     }
 
-    function testZkValidateTransaction() public {
+    // You'll also need --system-mode=true to run this test
+    function testZkValidateTransaction() public onlyZkSync {
         // Arrange
         address dest = address(usdc);
         uint256 value = 0;
@@ -61,12 +64,6 @@ contract ZkMinimalAccountTest is Test {
         Transaction memory transaction =
             _createUnsignedTransaction(minimalAccount.owner(), 113, dest, value, functionData);
         transaction = _signTransaction(transaction);
-
-        console2.log(minimalAccount.owner());
-        console2.log(address(minimalAccount));
-        console2.log(address(uint160(transaction.from)));
-        console2.log(address(uint160(transaction.to)));
-        console2.logBytes(transaction.signature);
 
         // Act
         vm.prank(BOOTLOADER_FORMAL_ADDRESS);
@@ -81,12 +78,12 @@ contract ZkMinimalAccountTest is Test {
     //////////////////////////////////////////////////////////////*/
     function _signTransaction(Transaction memory transaction) internal view returns (Transaction memory) {
         bytes32 unsignedTransactionHash = MemoryTransactionHelper.encodeHash(transaction);
-        bytes32 digest = unsignedTransactionHash.toEthSignedMessageHash();
+        // bytes32 digest = unsignedTransactionHash.toEthSignedMessageHash();
         uint8 v;
         bytes32 r;
         bytes32 s;
         uint256 ANVIL_DEFAULT_KEY = 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80;
-        (v, r, s) = vm.sign(ANVIL_DEFAULT_KEY, digest);
+        (v, r, s) = vm.sign(ANVIL_DEFAULT_KEY, unsignedTransactionHash);
         Transaction memory signedTransaction = transaction;
         signedTransaction.signature = abi.encodePacked(r, s, v);
         return signedTransaction;

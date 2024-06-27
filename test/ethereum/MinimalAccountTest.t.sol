@@ -9,8 +9,9 @@ import {ERC20Mock} from "@openzeppelin/contracts/mocks/token/ERC20Mock.sol";
 import {SendPackedUserOp, PackedUserOperation, IEntryPoint} from "script/SendPackedUserOp.s.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
+import {ZkSyncChainChecker} from "lib/foundry-devops/src/ZkSyncChainChecker.sol";
 
-contract MinimalAccountTest is Test {
+contract MinimalAccountTest is Test, ZkSyncChainChecker {
     using MessageHashUtils for bytes32;
 
     HelperConfig helperConfig;
@@ -22,7 +23,7 @@ contract MinimalAccountTest is Test {
 
     uint256 constant AMOUNT = 1e18;
 
-    function setUp() public {
+    function setUp() public skipZkSync {
         DeployMinimal deployMinimal = new DeployMinimal();
         (helperConfig, minimalAccount) = deployMinimal.deployMinimalAccount();
         usdc = new ERC20Mock();
@@ -34,7 +35,7 @@ contract MinimalAccountTest is Test {
     // approve some amount
     // USDC contract
     // come from the entrypoint
-    function testOwnerCanExecuteCommands() public {
+    function testOwnerCanExecuteCommands() public skipZkSync {
         // Arrange
         assertEq(usdc.balanceOf(address(minimalAccount)), 0);
         address dest = address(usdc);
@@ -48,7 +49,7 @@ contract MinimalAccountTest is Test {
         assertEq(usdc.balanceOf(address(minimalAccount)), AMOUNT);
     }
 
-    function testNonOwnerCannotExecuteCommands() public {
+    function testNonOwnerCannotExecuteCommands() public skipZkSync {
         // Arrange
         assertEq(usdc.balanceOf(address(minimalAccount)), 0);
         address dest = address(usdc);
@@ -60,7 +61,7 @@ contract MinimalAccountTest is Test {
         minimalAccount.execute(dest, value, functionData);
     }
 
-    function testRecoverSignedOp() public {
+    function testRecoverSignedOp() public skipZkSync {
         // Arrange
         assertEq(usdc.balanceOf(address(minimalAccount)), 0);
         address dest = address(usdc);
@@ -83,7 +84,7 @@ contract MinimalAccountTest is Test {
     // 1. Sign user ops
     // 2. Call validate userops
     // 3. Assert the return is correct
-    function testValidationOfUserOps() public {
+    function testValidationOfUserOps() public skipZkSync {
         // Arrange
         assertEq(usdc.balanceOf(address(minimalAccount)), 0);
         address dest = address(usdc);
@@ -103,7 +104,7 @@ contract MinimalAccountTest is Test {
         assertEq(validationData, 0);
     }
 
-    function testEntryPointCanExecuteCommands() public {
+    function testEntryPointCanExecuteCommands() public skipZkSync {
         // Arrange
         assertEq(usdc.balanceOf(address(minimalAccount)), 0);
         address dest = address(usdc);

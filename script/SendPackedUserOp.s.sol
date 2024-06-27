@@ -8,24 +8,30 @@ import {IEntryPoint} from "lib/account-abstraction/contracts/interfaces/IEntryPo
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {MinimalAccount} from "src/ethereum/MinimalAccount.sol";
+import {DevOpsTools} from "lib/foundry-devops/src/DevOpsTools.sol";
 
 contract SendPackedUserOp is Script {
     using MessageHashUtils for bytes32;
 
+    // Make sure you trust this user - don't run this on Mainnet!
+    address constant RANDOM_APPROVER = 0x9EA9b0cc1919def1A3CfAEF4F7A66eE3c36F86fC;
+
     function run() public {
+        // Setup
         HelperConfig helperConfig = new HelperConfig();
-        address dest = 0xaf88d065e77c8cC2239327C5EDb3A432268e5831; // arbitrum mainnet USDC address
+        address dest = helperConfig.getConfig().usdc; // arbitrum mainnet USDC address
         uint256 value = 0;
-        bytes memory functionData =
-            abi.encodeWithSelector(IERC20.approve.selector, 0x9EA9b0cc1919def1A3CfAEF4F7A66eE3c36F86fC, 1e18);
+        address minimalAccountAddress = DevOpsTools.get_most_recent_deployment("MinimalAccount", block.chainid);
+
+        bytes memory functionData = abi.encodeWithSelector(IERC20.approve.selector, RANDOM_APPROVER, 1e18);
         bytes memory executeCalldata =
             abi.encodeWithSelector(MinimalAccount.execute.selector, dest, value, functionData);
-        PackedUserOperation memory userOp = generateSignedUserOperation(
-            executeCalldata, helperConfig.getConfig(), 0x03Ad95a54f02A40180D45D76789C448024145aaF
-        );
+        PackedUserOperation memory userOp =
+            generateSignedUserOperation(executeCalldata, helperConfig.getConfig(), minimalAccountAddress);
         PackedUserOperation[] memory ops = new PackedUserOperation[](1);
         ops[0] = userOp;
 
+        // Send transaction
         vm.startBroadcast();
         IEntryPoint(helperConfig.getConfig().entryPoint).handleOps(ops, payable(helperConfig.getConfig().account));
         vm.stopBroadcast();

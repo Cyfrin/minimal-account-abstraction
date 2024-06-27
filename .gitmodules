@@ -10,3 +10,6 @@
 [submodule "lib/foundry-era-contracts"]
 	path = lib/foundry-era-contracts
 	url = https://github.com/Cyfrin/foundry-era-contracts
+[submodule "lib/foundry-devops"]
+	path = lib/foundry-devops
+	url = https://github.com/cyfrin/foundry-devops
