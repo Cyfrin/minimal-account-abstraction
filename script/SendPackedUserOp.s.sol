@@ -14,7 +14,7 @@ contract SendPackedUserOp is Script {
     using MessageHashUtils for bytes32;
 
     // Make sure you trust this user - don't run this on Mainnet!
-    address constant RANDOM_APPROVER = 0x9EA9b0cc1919def1A3CfAEF4F7A66eE3c36F86fC;
+    address constant APPROVED_SPENDER = 0x9EA9b0cc1919def1A3CfAEF4F7A66eE3c36F86fC;
 
     function run() public {
         // Setup
@@ -23,7 +23,7 @@ contract SendPackedUserOp is Script {
         uint256 value = 0;
         address minimalAccountAddress = DevOpsTools.get_most_recent_deployment("MinimalAccount", block.chainid);
 
-        bytes memory functionData = abi.encodeWithSelector(IERC20.approve.selector, RANDOM_APPROVER, 1e18);
+        bytes memory functionData = abi.encodeWithSelector(IERC20.approve.selector, APPROVED_SPENDER, 1e18);
         bytes memory executeCalldata =
             abi.encodeWithSelector(MinimalAccount.execute.selector, dest, value, functionData);
         PackedUserOperation memory userOp =
