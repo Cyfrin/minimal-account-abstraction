@@ -99,6 +99,7 @@ contract MinimalAccountTest is Test, ZkSyncChainChecker {
         uint256 missingAccountFunds = 1e18;
 
         // Act
+        vm.deal(address(minimalAccount), 1e18);
         vm.prank(helperConfig.getConfig().entryPoint);
         uint256 validationData = minimalAccount.validateUserOp(packedUserOp, userOperationHash, missingAccountFunds);
         assertEq(validationData, 0);
