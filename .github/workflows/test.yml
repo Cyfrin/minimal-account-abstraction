@@ -1,16 +1,17 @@
 name: test
 
-on: workflow_dispatch
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 env:
   FOUNDRY_PROFILE: ci
 
 jobs:
-  check:
-    strategy:
-      fail-fast: true
-
-    name: Foundry project
+  test-ethereum:
+    name: Ethereum Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -25,10 +26,24 @@ jobs:
       - name: Run Forge build
         run: |
           forge --version
-          forge build --sizes
+          forge build
         id: build
 
-      - name: Run Forge tests
-        run: |
-          forge test -vvv
+      - name: Run Ethereum tests
+        run: forge test --match-path "test/ethereum/**" -vvv
+        id: test
+
+  test-zksync:
+    name: zkSync Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install foundry-zksync
+        uses: dutterbutter/foundry-zksync-toolchain@v1
+
+      - name: Run zkSync tests
+        run: forge test --match-path "test/zksync/**" --zksync --system-mode=true -vvv
         id: test
